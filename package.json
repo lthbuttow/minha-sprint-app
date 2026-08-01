@@ -1,0 +1,20 @@
+{
+  "name": "my-sprint-tracker",
+  "version": "1.0.0",
+  "description": "API REST para acompanhamento diário de sprints pessoais.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.1.0",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.8.1"
+  }
+}

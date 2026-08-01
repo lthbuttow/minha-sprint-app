@@ -1,0 +1,159 @@
+openapi: 3.0.3
+info:
+  title: My Sprint Tracker API
+  version: 1.0.0
+  description: API REST local para registrar o acompanhamento diário de sprints pessoais.
+servers:
+  - url: http://localhost:3000
+paths:
+  /health:
+    get:
+      summary: Verifica a disponibilidade da API
+      responses:
+        '200':
+          description: API disponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /api/sprints:
+    get:
+      summary: Lista todas as sprints
+      responses:
+        '200':
+          description: Lista de sprints
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Sprint' }
+    post:
+      summary: Cria uma sprint com 11 dias por padrão
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSprint' }
+      responses:
+        '201':
+          description: Sprint criada
+          content: { application/json: { schema: { $ref: '#/components/schemas/Sprint' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /api/sprints/{sprintId}:
+    parameters: [ { $ref: '#/components/parameters/SprintId' } ]
+    get:
+      summary: Obtém uma sprint completa
+      responses:
+        '200': { description: Sprint encontrada, content: { application/json: { schema: { $ref: '#/components/schemas/Sprint' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Altera o nome e/ou as anotações gerais da sprint
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateSprint' } } }
+      responses:
+        '200': { description: Sprint atualizada, content: { application/json: { schema: { $ref: '#/components/schemas/Sprint' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/sprints/{sprintId}/days:
+    parameters: [ { $ref: '#/components/parameters/SprintId' } ]
+    post:
+      summary: Adiciona um dia à sprint
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateDay' } } }
+      responses:
+        '201': { description: Dia criado, content: { application/json: { schema: { $ref: '#/components/schemas/SprintDay' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/sprints/{sprintId}/days/{dayId}:
+    parameters: [ { $ref: '#/components/parameters/SprintId' }, { $ref: '#/components/parameters/DayId' } ]
+    patch:
+      summary: Registra ou altera o resumo de um dia
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateDay' } } }
+      responses:
+        '200': { description: Dia atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/SprintDay' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      summary: Remove um dia da sprint
+      responses:
+        '204': { description: Dia removido }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/sprints/{sprintId}/attention-points:
+    parameters: [ { $ref: '#/components/parameters/SprintId' } ]
+    post:
+      summary: Adiciona um ponto de atenção
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateAttentionPoint' } } }
+      responses:
+        '201': { description: Ponto criado, content: { application/json: { schema: { $ref: '#/components/schemas/AttentionPoint' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/sprints/{sprintId}/attention-points/{pointId}:
+    parameters: [ { $ref: '#/components/parameters/SprintId' }, { $ref: '#/components/parameters/PointId' } ]
+    patch:
+      summary: Resolve ou reabre um ponto de atenção
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ResolveAttentionPoint' } } }
+      responses:
+        '200': { description: Ponto atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/AttentionPoint' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+components:
+  parameters:
+    SprintId: { name: sprintId, in: path, required: true, schema: { type: integer, minimum: 1 } }
+    DayId: { name: dayId, in: path, required: true, schema: { type: integer, minimum: 1 } }
+    PointId: { name: pointId, in: path, required: true, schema: { type: integer, minimum: 1 } }
+  responses:
+    BadRequest: { description: Dados inválidos, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    NotFound: { description: Recurso não encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    Conflict: { description: Conflito de dados, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  schemas:
+    Health: { type: object, required: [status], properties: { status: { type: string, example: ok } } }
+    Error: { type: object, required: [error], properties: { error: { type: string } } }
+    SprintDay:
+      type: object
+      required: [id, date, summary]
+      properties: { id: { type: integer }, date: { type: string, format: date }, summary: { type: string } }
+    AttentionPoint:
+      type: object
+      required: [id, title, description, resolved, resolution, createdAt, resolvedAt, overdue]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        resolved: { type: boolean }
+        resolution: { type: string, nullable: true }
+        createdAt: { type: string }
+        resolvedAt: { type: string, nullable: true }
+        overdue: { type: boolean, description: Verdadeiro quando aberto há mais de 3 dias. }
+    Sprint:
+      type: object
+      required: [id, name, generalNotes, createdAt, days, attentionPoints]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        generalNotes: { type: string }
+        createdAt: { type: string }
+        days: { type: array, items: { $ref: '#/components/schemas/SprintDay' } }
+        attentionPoints: { type: array, items: { $ref: '#/components/schemas/AttentionPoint' } }
+    CreateSprint:
+      type: object
+      required: [name]
+      properties: { name: { type: string }, startDate: { type: string, format: date }, generalNotes: { type: string } }
+    UpdateSprint: { type: object, properties: { name: { type: string }, generalNotes: { type: string } } }
+    CreateDay: { type: object, required: [date], properties: { date: { type: string, format: date }, summary: { type: string } } }
+    UpdateDay: { type: object, required: [summary], properties: { summary: { type: string } } }
+    CreateAttentionPoint: { type: object, required: [title], properties: { title: { type: string }, description: { type: string } } }
+    ResolveAttentionPoint:
+      type: object
+      required: [resolved]
+      properties: { resolved: { type: boolean }, resolution: { type: string, description: Obrigatória se resolved for true. } }
