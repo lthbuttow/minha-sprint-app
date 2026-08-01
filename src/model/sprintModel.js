@@ -7,7 +7,8 @@ function mapDay(day) {
 }
 
 function mapAttentionPoint(point) {
-  const createdAt = new Date(`${point.created_at.replace(' ', 'T')}Z`);
+  const timestamp = point.created_at.includes('T') ? point.created_at : `${point.created_at.replace(' ', 'T')}Z`;
+  const createdAt = new Date(timestamp);
   const elapsedDays = Math.floor((Date.now() - createdAt.getTime()) / 86_400_000);
 
   return {
@@ -22,11 +23,21 @@ function mapAttentionPoint(point) {
   };
 }
 
+function mapAnnotation(annotation) {
+  return {
+    id: annotation.id,
+    content: annotation.content,
+    createdAt: annotation.created_at,
+    updatedAt: annotation.updated_at
+  };
+}
+
 function getSprintById(id) {
   const sprint = database.prepare('SELECT * FROM sprints WHERE id = ?').get(id);
   if (!sprint) return null;
 
   const days = database.prepare('SELECT id, date, summary FROM sprint_days WHERE sprint_id = ? ORDER BY date').all(id);
+  const annotations = database.prepare('SELECT * FROM sprint_annotations WHERE sprint_id = ? ORDER BY updated_at DESC, id DESC').all(id);
   const attentionPoints = database.prepare('SELECT * FROM attention_points WHERE sprint_id = ? ORDER BY created_at DESC').all(id);
 
   return {
@@ -35,6 +46,7 @@ function getSprintById(id) {
     generalNotes: sprint.general_notes,
     createdAt: sprint.created_at,
     days: days.map(mapDay),
+    annotations: annotations.map(mapAnnotation),
     attentionPoints: attentionPoints.map(mapAttentionPoint)
   };
 }

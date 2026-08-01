@@ -74,6 +74,30 @@ function removeDay(sprintId, dayId) {
   if (!result.changes) throw error('Dia não encontrado nesta sprint.', 404);
 }
 
+function addAnnotation(sprintId, { content }) {
+  assertSprint(sprintId);
+  if (typeof content !== 'string' || !content.trim()) throw error('O campo "content" é obrigatório.', 400);
+  const result = database.prepare('INSERT INTO sprint_annotations (sprint_id, title, content) VALUES (?, ?, ?)').run(sprintId, '', content.trim());
+  return getSprintById(sprintId).annotations.find((annotation) => annotation.id === Number(result.lastInsertRowid));
+}
+
+function updateAnnotation(sprintId, annotationId, { content }) {
+  assertSprint(sprintId);
+  if (content === undefined) throw error('Informe "content".', 400);
+  if (content !== undefined && (typeof content !== 'string' || !content.trim())) throw error('"content" deve ser um texto não vazio.', 400);
+  const annotation = database.prepare('SELECT * FROM sprint_annotations WHERE id = ? AND sprint_id = ?').get(annotationId, sprintId);
+  if (!annotation) throw error('Anotação não encontrada nesta sprint.', 404);
+  database.prepare('UPDATE sprint_annotations SET content = ?, updated_at = ? WHERE id = ?')
+    .run(content.trim(), new Date().toISOString(), annotationId);
+  return getSprintById(sprintId).annotations.find((item) => item.id === Number(annotationId));
+}
+
+function removeAnnotation(sprintId, annotationId) {
+  assertSprint(sprintId);
+  const result = database.prepare('DELETE FROM sprint_annotations WHERE id = ? AND sprint_id = ?').run(annotationId, sprintId);
+  if (!result.changes) throw error('Anotação não encontrada nesta sprint.', 404);
+}
+
 function addAttentionPoint(sprintId, { title, description = '' }) {
   assertSprint(sprintId);
   if (typeof title !== 'string' || !title.trim()) throw error('O campo "title" é obrigatório.', 400);
@@ -93,4 +117,4 @@ function resolveAttentionPoint(sprintId, pointId, { resolved, resolution }) {
   return getSprintById(sprintId).attentionPoints.find((point) => point.id === Number(pointId));
 }
 
-module.exports = { getAllSprints, assertSprint, createSprint, updateSprint, addDay, updateDay, removeDay, addAttentionPoint, resolveAttentionPoint };
+module.exports = { getAllSprints, assertSprint, createSprint, updateSprint, addDay, updateDay, removeDay, addAnnotation, updateAnnotation, removeAnnotation, addAttentionPoint, resolveAttentionPoint };

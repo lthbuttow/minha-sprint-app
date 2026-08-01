@@ -56,6 +56,16 @@ paths:
         '200': { description: Sprint atualizada, content: { application/json: { schema: { $ref: '#/components/schemas/Sprint' } } } }
         '400': { $ref: '#/components/responses/BadRequest' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /api/sprints/{sprintId}/report.pdf:
+    parameters: [ { $ref: '#/components/parameters/SprintId' } ]
+    get:
+      summary: Exporta o relatório completo da sprint em PDF
+      responses:
+        '200':
+          description: Arquivo PDF para download
+          content: { application/pdf: { schema: { type: string, format: binary } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /api/sprints/{sprintId}/days:
     parameters: [ { $ref: '#/components/parameters/SprintId' } ]
     post:
@@ -96,6 +106,34 @@ paths:
         '201': { description: Ponto criado, content: { application/json: { schema: { $ref: '#/components/schemas/AttentionPoint' } } } }
         '400': { $ref: '#/components/responses/BadRequest' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /api/sprints/{sprintId}/annotations:
+    parameters: [ { $ref: '#/components/parameters/SprintId' } ]
+    post:
+      summary: Adiciona um bloco de anotação geral
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateAnnotation' } } }
+      responses:
+        '201': { description: Bloco criado, content: { application/json: { schema: { $ref: '#/components/schemas/Annotation' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/sprints/{sprintId}/annotations/{annotationId}:
+    parameters: [ { $ref: '#/components/parameters/SprintId' }, { $ref: '#/components/parameters/AnnotationId' } ]
+    patch:
+      summary: Edita um bloco de anotação geral
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateAnnotation' } } }
+      responses:
+        '200': { description: Bloco atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/Annotation' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      summary: Exclui um bloco de anotação geral
+      responses:
+        '204': { description: Bloco excluído }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /api/sprints/{sprintId}/attention-points/{pointId}:
     parameters: [ { $ref: '#/components/parameters/SprintId' }, { $ref: '#/components/parameters/PointId' } ]
     patch:
@@ -112,6 +150,7 @@ components:
     SprintId: { name: sprintId, in: path, required: true, schema: { type: integer, minimum: 1 } }
     DayId: { name: dayId, in: path, required: true, schema: { type: integer, minimum: 1 } }
     PointId: { name: pointId, in: path, required: true, schema: { type: integer, minimum: 1 } }
+    AnnotationId: { name: annotationId, in: path, required: true, schema: { type: integer, minimum: 1 } }
   responses:
     BadRequest: { description: Dados inválidos, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     NotFound: { description: Recurso não encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
@@ -135,6 +174,14 @@ components:
         createdAt: { type: string }
         resolvedAt: { type: string, nullable: true }
         overdue: { type: boolean, description: Verdadeiro quando aberto há mais de 3 dias. }
+    Annotation:
+      type: object
+      required: [id, content, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        content: { type: string }
+        createdAt: { type: string }
+        updatedAt: { type: string }
     Sprint:
       type: object
       required: [id, name, generalNotes, createdAt, days, attentionPoints]
@@ -144,6 +191,7 @@ components:
         generalNotes: { type: string }
         createdAt: { type: string }
         days: { type: array, items: { $ref: '#/components/schemas/SprintDay' } }
+        annotations: { type: array, items: { $ref: '#/components/schemas/Annotation' } }
         attentionPoints: { type: array, items: { $ref: '#/components/schemas/AttentionPoint' } }
     CreateSprint:
       type: object
@@ -153,6 +201,8 @@ components:
     CreateDay: { type: object, required: [date], properties: { date: { type: string, format: date }, summary: { type: string } } }
     UpdateDay: { type: object, required: [summary], properties: { summary: { type: string } } }
     CreateAttentionPoint: { type: object, required: [title], properties: { title: { type: string }, description: { type: string } } }
+    CreateAnnotation: { type: object, required: [content], properties: { content: { type: string } } }
+    UpdateAnnotation: { type: object, required: [content], properties: { content: { type: string } } }
     ResolveAttentionPoint:
       type: object
       required: [resolved]

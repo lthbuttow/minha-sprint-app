@@ -9,6 +9,7 @@ const app = express();
 const swaggerDocument = YAML.parse(fs.readFileSync(path.join(__dirname, '../resources/swagger.yaml'), 'utf8'));
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/sprints', sprintRoutes);

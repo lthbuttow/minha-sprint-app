@@ -11,7 +11,13 @@ npm install
 npm start
 ```
 
-A API estará em `http://localhost:3000`; a interface Swagger está em `http://localhost:3000/api-docs`. A especificação fonte está em [resources/swagger.yaml](resources/swagger.yaml).
+A aplicação web estará em `http://localhost:3000`; a interface Swagger está em `http://localhost:3000/api-docs`. A especificação fonte está em [resources/swagger.yaml](resources/swagger.yaml).
+
+## Interface web
+
+A página inicial entrega um painel simples para criar e alternar entre sprints, registrar resumos diários, adicionar dias, criar/editar/excluir blocos de anotações gerais e acompanhar ou resolver pontos de atenção. Os arquivos estáticos estão em `public/` e são servidos pelo próprio Express; não há processo de build separado.
+
+Ao iniciar, o banco em memória é preenchido automaticamente com cinco sprints de exemplo. Como o banco é temporário, os dados são recriados a cada reinicialização da aplicação.
 
 ## Comportamento
 
@@ -24,6 +30,7 @@ Ao criar uma sprint, são criados 11 dias consecutivos a partir de `startDate` (
 | GET | `/health` | Estado da API |
 | GET, POST | `/api/sprints` | Lista ou cria sprints |
 | GET, PATCH | `/api/sprints/:sprintId` | Consulta ou atualiza nome/anotações |
+| GET | `/api/sprints/:sprintId/report.pdf` | Baixa relatório completo da sprint em PDF |
 | POST | `/api/sprints/:sprintId/days` | Adiciona um dia |
 | PATCH, DELETE | `/api/sprints/:sprintId/days/:dayId` | Atualiza resumo ou remove dia |
 | POST | `/api/sprints/:sprintId/attention-points` | Cria ponto de atenção |

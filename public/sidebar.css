@@ -1,0 +1,19 @@
+.app-layout { display: grid; grid-template-columns: 238px minmax(0, 1fr); gap: 28px; align-items: start; }
+.workspace { min-width: 0; }
+.sprint-sidebar { position: sticky; top: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 15px; padding: 17px 12px 12px; box-shadow: var(--shadow); }
+.sidebar-heading { display: flex; justify-content: space-between; align-items: start; padding: 0 5px 13px; }
+.sidebar-heading .eyebrow { margin: 4px 0 0; }
+.search-field { display: flex; align-items: center; gap: 7px; padding: 0 9px; background: #f3f4ee; border-radius: 8px; color: var(--muted); }
+.search-field input { background: transparent; border: 0; outline: 0; padding: 9px 0; font-size: .78rem; }
+.sprint-list { display: grid; gap: 3px; margin: 13px 0 9px; max-height: 498px; overflow-y: auto; }
+.sprint-menu-item { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px; background: transparent; border: 0; border-radius: 8px; padding: 10px 8px; color: var(--muted); text-align: left; cursor: pointer; font: 600 .82rem 'DM Sans'; }
+.sprint-menu-item:hover { background: #f3f4ee; color: var(--ink); }
+.sprint-menu-item.active { color: white; background: var(--accent); }
+.sprint-menu-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sprint-menu-item small { font: 500 .68rem 'DM Sans'; opacity: .76; white-space: nowrap; }
+.show-more { width: 100%; padding: 9px 6px 3px; border: 0; background: transparent; color: var(--accent); cursor: pointer; font: 700 .76rem 'DM Sans'; }
+.app-layout .empty-state { margin: 80px auto; }
+.days-card #add-day { margin-top: 14px; }
+.export-report { border: 1px solid rgba(255,255,255,.45); border-radius: 8px; padding: 9px 11px; color: white; background: rgba(255,255,255,.1); cursor: pointer; font: 700 .78rem 'DM Sans'; }
+.export-report:hover { background: rgba(255,255,255,.2); }
+@media (max-width: 790px) { .app-layout { grid-template-columns: 1fr; gap: 18px; } .sprint-sidebar { position: static; } .sprint-list { max-height: 215px; } }

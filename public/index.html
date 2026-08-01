@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meu acompanhamento de sprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/notes.css" />
+    <link rel="stylesheet" href="/sidebar.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div><p class="eyebrow">PLANEJAMENTO PESSOAL</p><h1>Minha sprint</h1></div>
+        <button id="new-sprint-button" class="button primary">+ Nova sprint</button>
+      </header>
+
+      <div class="app-layout">
+        <aside id="sprint-sidebar" class="sprint-sidebar hidden">
+          <div class="sidebar-heading"><p class="eyebrow">SUAS SPRINTS</p><span id="sprints-total" class="count-badge"></span></div>
+          <label class="search-field"><span>⌕</span><input id="sprint-search" type="search" placeholder="Buscar sprint" /></label>
+          <nav id="sprint-list" class="sprint-list" aria-label="Sprints"></nav>
+          <button id="show-more-sprints" class="show-more" type="button">Ver mais sprints</button>
+        </aside>
+        <section class="workspace">
+          <section id="empty-state" class="empty-state hidden">
+            <div class="empty-icon">✦</div><h2>Comece sua próxima sprint</h2><p>Crie uma sprint para acompanhar seus dias, anotações e pontos de atenção.</p><button class="button primary" data-open-sprint-modal>+ Criar sprint</button>
+          </section>
+          <div id="app-content" class="hidden">
+        <section id="sprint-header" class="sprint-header"></section>
+        <section class="dashboard-grid">
+          <article class="card days-card"><div class="card-heading"><div><p class="eyebrow">DIÁRIO</p><h2>Como foi seu dia?</h2></div><span id="day-count" class="count-badge"></span></div><div id="days-list" class="days-list"></div><button id="add-day" class="button secondary" type="button">+ Adicionar um dia</button></article>
+          <aside class="side-column">
+            <article class="card notes-card"><div class="card-heading"><div><p class="eyebrow">CONTEXTO</p><h2>Anotações gerais</h2></div><span id="annotation-count" class="count-badge"></span></div><form id="annotation-form" class="annotation-form"><textarea id="annotation-content" required placeholder="Contexto, objetivo, aprendizado..."></textarea><button class="button secondary" type="submit">+ Adicionar anotação</button></form><div id="annotations-list" class="annotations-list"></div></article>
+            <article class="card attention-card"><div class="card-heading"><div><p class="eyebrow">ACOMPANHAMENTO</p><h2>Pontos de atenção</h2></div><span id="attention-count" class="count-badge warn"></span></div><form id="attention-form" class="inline-form"><input id="attention-title" required maxlength="180" placeholder="Adicionar ponto de atenção" /><button class="button small primary" type="submit">Adicionar</button></form><div id="attention-list" class="attention-list"></div></article>
+          </aside>
+        </section>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <dialog id="sprint-modal" class="modal"><form id="sprint-form" method="dialog"><button class="close-modal" type="button" aria-label="Fechar">×</button><p class="eyebrow">NOVA SPRINT</p><h2>Em que você vai focar?</h2><label>Nome<input id="sprint-name" required maxlength="100" placeholder="Ex.: Sprint de produto" /></label><label>Data inicial<input id="sprint-start-date" type="date" required /></label><label>Anotações iniciais <span class="optional">opcional</span><textarea id="sprint-initial-notes" placeholder="Contexto e objetivos..."></textarea></label><button class="button primary full" type="submit">Criar sprint de 11 dias</button></form></dialog>
+    <dialog id="resolution-modal" class="modal"><form id="resolution-form" method="dialog"><button class="close-modal" type="button" aria-label="Fechar">×</button><p class="eyebrow">RESOLVER PONTO</p><h2>Qual foi a resolução?</h2><label>Resolução<textarea id="resolution-text" required placeholder="Descreva como o ponto foi resolvido..."></textarea></label><button class="button primary full" type="submit">Marcar como resolvido</button></form></dialog>
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+.annotation-form { display: grid; gap: 8px; }
+.annotation-form textarea { min-height: 76px; resize: vertical; }
+.annotations-list { display: grid; gap: 9px; margin-top: 16px; }
+.annotation-item { background: #f8f8f3; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.annotation-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.annotation-title { font-size: .86rem; font-weight: 700; }
+.annotation-content { margin: 7px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.5; white-space: pre-wrap; }
+.annotation-actions { display: flex; gap: 7px; }
+.annotation-actions button { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font: 700 .73rem 'DM Sans'; }
+.annotation-actions button:last-child { color: #ad5635; }
