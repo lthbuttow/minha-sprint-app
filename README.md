@@ -57,3 +57,18 @@ curl -X PATCH http://localhost:3000/api/sprints/1/days/1 \
 - `src/service`: validações e regras da sprint.
 - `src/model`: persistência em `better-sqlite3` e mapeamento de dados.
 - `resources/swagger.yaml`: contrato OpenAPI 3.0.
+
+## Testes de API
+
+Os testes Playwright separam cada responsabilidade para que os cenários descrevam apenas o comportamento que está sendo verificado:
+
+- `tests/support/services`: serviços que encapsulam as requisições HTTP dos recursos cobertos pela suíte.
+- `tests/support/contracts`: schemas Zod e tipos inferidos para validar o contrato das respostas da API.
+- `tests/support/factories`: massa de dados válida e específica para cada cenário.
+- `tests/api`: fluxos de teste, combinando serviços, factories e contratos.
+
+Por exemplo, um cenário cria uma massa com `createSprintPayload`, chama `sprints.create` e valida a resposta com `sprintSchema.parse`. Assim, mudanças de rota, payload ou contrato ficam isoladas no lugar adequado.
+
+```bash
+npm run test:api
+```
