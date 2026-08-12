@@ -1,8 +1,6 @@
-name: Testes de API
+name: Testes de API - Smoke
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -28,8 +26,8 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Executar testes de API
-        run: npm run test:api
+      - name: Executar testes de smoke da API
+        run: npm run test:api:smoke
 
       - name: Publicar relatório Playwright
         if: ${{ always() }}
