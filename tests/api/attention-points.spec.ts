@@ -55,7 +55,7 @@ test.describe("POST /api/sprints/{sprintId}/attention-points", () => {
 });
 
 test.describe("PATCH /api/sprints/{sprintId}/attention-points/{pointId}", () => {
-  test("ATT-007 resolve um ponto de atenção", async ({ sprints }) => {
+  test("ATT-007 resolve um ponto de atenção @smoke", async ({ sprints }) => {
     const sprint = sprintSchema.parse(
       (await sprints.create(createSprintPayload())).body,
     );
@@ -81,7 +81,7 @@ test.describe("PATCH /api/sprints/{sprintId}/attention-points/{pointId}", () => 
     });
   });
 
-  test("ATT-008 exige resolução ao resolver um ponto", async ({ sprints }) => {
+  test("ATT-008 exige resolução ao resolver um ponto @smoke", async ({ sprints }) => {
     const sprint = sprintSchema.parse(
       (await sprints.create(createSprintPayload())).body,
     );

@@ -11,7 +11,7 @@ const validCredentials = {
 };
 
 test.describe("Autenticação JWT", () => {
-  test("AUTH-009 bloqueia uma rota protegida sem token", async ({
+  test("AUTH-009 bloqueia uma rota protegida sem token @smoke", async ({
     request,
   }) => {
     const response = await request.get("/api/sprints");
@@ -19,7 +19,7 @@ test.describe("Autenticação JWT", () => {
     expect(response.status()).toBe(401);
   });
 
-  test("AUTH-001 emite token para credenciais válidas", async ({ request }) => {
+  test("AUTH-001 emite token para credenciais válidas @smoke", async ({ request }) => {
     const valid = await request.post("/api/auth/login", {
       data: validCredentials,
     });
@@ -28,7 +28,7 @@ test.describe("Autenticação JWT", () => {
     expect(body.accessToken).toEqual(expect.any(String));
   });
 
-  test("AUTH-002 rejeita username inválido", async ({ request }) => {
+  test("AUTH-002 rejeita username inválido @smoke", async ({ request }) => {
     const response = await request.post("/api/auth/login", {
       data: { username: "inexistente", password: validCredentials.password },
     });
@@ -36,7 +36,7 @@ test.describe("Autenticação JWT", () => {
     expect(response.status()).toBe(401);
   });
 
-  test("AUTH-003 rejeita password inválida", async ({ request }) => {
+  test("AUTH-003 rejeita password inválida @smoke", async ({ request }) => {
     const response = await request.post("/api/auth/login", {
       data: { username: validCredentials.username, password: "incorreta" },
     });
@@ -86,7 +86,7 @@ test.describe("Autenticação JWT", () => {
     expect(response.status()).toBe(401);
   });
 
-  test("AUTH-010 rejeita token malformado", async ({ request }) => {
+  test("AUTH-010 rejeita token malformado @smoke", async ({ request }) => {
     const response = await request.get("/api/sprints", {
       headers: { Authorization: "Bearer invalido" },
     });

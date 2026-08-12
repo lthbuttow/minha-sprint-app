@@ -3,14 +3,14 @@ import { apiErrorSchema } from "../support/contracts/api.contract";
 import { sprintSchema } from "../support/contracts/sprint.contract";
 import { createSprintPayload } from "../support/factories/sprint.factory";
 
-test("SPRINT-001 lista sprints", async ({ sprints }) => {
+test("SPRINT-001 lista sprints @smoke", async ({ sprints }) => {
   const result = await sprints.list();
   const list = sprintSchema.array().parse(result.body);
   expect(result.status).toBe(200);
   expect(list.length).toBeGreaterThan(0);
 });
 
-test("SPRINT-002 cria uma sprint válida", async ({ sprints }) => {
+test("SPRINT-002 cria uma sprint válida @smoke", async ({ sprints }) => {
   const result = await sprints.create(createSprintPayload());
   const sprint = sprintSchema.parse(result.body);
   expect(result.status).toBe(201);
@@ -26,7 +26,7 @@ test("SPRINT-003 usa data padrão sem startDate", async ({ sprints }) => {
   expect(sprint.days).toHaveLength(11);
 });
 
-test("SPRINT-004 cria onze dias consecutivos", async ({ sprints }) => {
+test("SPRINT-004 cria onze dias consecutivos @smoke", async ({ sprints }) => {
   const result = await sprints.create(createSprintPayload());
   const sprint = sprintSchema.parse(result.body);
   expect(result.status).toBe(201);
@@ -47,7 +47,7 @@ test("SPRINT-004 cria onze dias consecutivos", async ({ sprints }) => {
   ]);
 });
 
-test("SPRINT-005 rejeita sprint sem nome", async ({ sprints }) => {
+test("SPRINT-005 rejeita sprint sem nome @smoke", async ({ sprints }) => {
   const result = await sprints.create(createSprintPayload({ name: undefined }));
   apiErrorSchema.parse(result.body);
   expect(result.status).toBe(400);
@@ -100,7 +100,7 @@ test("SPRINT-010 persiste generalNotes válida", async ({ sprints }) => {
   expect(sprint.generalNotes).toBe("Nota válida");
 });
 
-test("SPRINT-012 consulta uma sprint existente", async ({ sprints }) => {
+test("SPRINT-012 consulta uma sprint existente @smoke", async ({ sprints }) => {
   const sprint = sprintSchema.parse(
     (await sprints.create(createSprintPayload())).body,
   );
@@ -196,7 +196,7 @@ test("SPRINT-022 rejeita atualização de sprint inexistente", async ({
   expect(result.status).toBe(404);
 });
 
-test("SPRINT-023 preserva campos não enviados", async ({ sprints }) => {
+test("SPRINT-023 preserva campos não enviados @smoke", async ({ sprints }) => {
   const sprint = sprintSchema.parse(
     (await sprints.create(createSprintPayload({ generalNotes: "Original" })))
       .body,

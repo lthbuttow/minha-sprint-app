@@ -1,4 +1,4 @@
-# My Sprint Tracker API
+# Minha Sprint
 
 API REST pessoal para registrar o resumo diário de uma sprint, anotações gerais e pontos de atenção. A API é protegida por JWT e usa um banco SQLite inteiramente em memória: os dados são descartados ao encerrar o processo.
 

@@ -12,7 +12,7 @@ import {
 const createSprint = async (sprints: any) =>
   sprintSchema.parse((await sprints.create(createSprintPayload())).body);
 
-test("DAY-001 cria um dia válido", async ({ sprints }) => {
+test("DAY-001 cria um dia válido @smoke", async ({ sprints }) => {
   const sprint = await createSprint(sprints);
   const result = await sprints.addDay(sprint.id, createDayPayload());
   const day = sprintDaySchema.parse(result.body);
@@ -55,7 +55,7 @@ test("DAY-005 rejeita criação em sprint inexistente", async ({ sprints }) => {
   expect(result.status).toBe(404);
 });
 
-test("DAY-006 impede data duplicada", async ({ sprints }) => {
+test("DAY-006 impede data duplicada @smoke", async ({ sprints }) => {
   const sprint = await createSprint(sprints);
   const date = "2026-09-01";
   sprintDaySchema.parse(
@@ -104,7 +104,7 @@ test("DAY-009 rejeita atualização de dia inexistente", async ({ sprints }) => 
   expect(result.status).toBe(404);
 });
 
-test("DAY-010 impede atualização de dia de outra sprint", async ({
+test("DAY-010 impede atualização de dia de outra sprint @smoke", async ({
   sprints,
 }) => {
   const a = await createSprint(sprints);
@@ -144,7 +144,7 @@ test("DAY-012 rejeita exclusão de dia inexistente", async ({ sprints }) => {
   expect(result.status).toBe(404);
 });
 
-test("DAY-013 rejeita exclusão de dia de outra sprint", async ({ sprints }) => {
+test("DAY-013 rejeita exclusão de dia de outra sprint @smoke", async ({ sprints }) => {
   const a = await createSprint(sprints);
   const b = await createSprint(sprints);
   const day = sprintDaySchema.parse(

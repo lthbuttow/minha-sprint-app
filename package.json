@@ -1,5 +1,5 @@
 {
-  "name": "my-sprint-tracker",
+  "name": "Minha Sprint",
   "version": "1.0.0",
   "description": "API REST para acompanhamento diário de sprints pessoais.",
   "main": "src/server.js",
@@ -8,6 +8,7 @@
     "dev": "node --watch src/server.js",
     "test": "node --test",
     "test:api": "playwright test",
+    "test:api:smoke": "playwright test --grep @smoke",
     "test:api:ui": "playwright test --ui",
     "test:api:report": "playwright show-report"
   },

@@ -37,7 +37,7 @@ test.describe("Integração entre recursos da sprint", () => {
     expect(persisted.days.some((item) => item.id === day.id)).toBe(true);
   });
 
-  test("INTEGRATION-002 impede acesso cruzado a annotation", async ({
+  test("INTEGRATION-002 impede acesso cruzado a annotation @smoke", async ({
     sprints,
   }) => {
     const sprintA = await createSprint(sprints);
@@ -58,7 +58,7 @@ test.describe("Integração entre recursos da sprint", () => {
     ).toBe(annotation.content);
   });
 
-  test("INTEGRATION-003 impede acesso cruzado a attention point", async ({
+  test("INTEGRATION-003 impede acesso cruzado a attention point @smoke", async ({
     sprints,
   }) => {
     const sprintA = await createSprint(sprints);
@@ -85,7 +85,7 @@ test.describe("Integração entre recursos da sprint", () => {
     ).toBe(false);
   });
 
-  test("INTEGRATION-004 gerencia o ciclo funcional completo de uma sprint", async ({
+  test("INTEGRATION-004 gerencia o ciclo funcional completo de uma sprint @smoke", async ({
     sprints,
   }) => {
     const created = await createSprint(sprints);
@@ -146,7 +146,7 @@ test.describe("Integração entre recursos da sprint", () => {
     });
   });
 
-  test("INTEGRATION-005 mantém dados persistidos após múltiplas operações", async ({
+  test("INTEGRATION-005 mantém dados persistidos após múltiplas operações @smoke", async ({
     sprints,
   }) => {
     const sprint = await createSprint(sprints);
