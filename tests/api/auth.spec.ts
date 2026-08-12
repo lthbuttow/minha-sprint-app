@@ -3,7 +3,7 @@ import {
   apiErrorSchema,
   authTokenSchema,
 } from "../support/contracts/api.contract";
-import "../support/load-env";
+import "dotenv/config";
 
 const validCredentials = {
   username: process.env.AUTH_USERNAME!,

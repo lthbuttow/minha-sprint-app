@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import '../support/load-env';
+import 'dotenv/config';
 import { LoginPage } from './pages/login.page';
 import { SprintPage } from './pages/sprint.page';
 

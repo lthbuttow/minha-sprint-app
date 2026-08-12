@@ -1,4 +1,4 @@
-require('./config/loadEnv');
+require('dotenv').config();
 const authService = require('./service/authService');
 
 authService.assertConfiguration();

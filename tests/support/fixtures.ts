@@ -1,6 +1,6 @@
 import { test as base } from '@playwright/test';
 import { SprintService } from './services/sprint.service';
-import './load-env';
+import 'dotenv/config';
 
 type Fixtures = { sprints: SprintService };
 
