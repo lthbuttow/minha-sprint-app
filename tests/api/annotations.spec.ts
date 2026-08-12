@@ -1,63 +1,117 @@
-import { expect, test } from '../support/fixtures';
-import { apiErrorSchema } from '../support/contracts/api.contract';
-import { annotationSchema, sprintSchema } from '../support/contracts/sprint.contract';
-import { createAnnotationPayload, createSprintPayload } from '../support/factories/sprint.factory';
+import { expect, test } from "../support/fixtures";
+import { apiErrorSchema } from "../support/contracts/api.contract";
+import {
+  annotationSchema,
+  sprintSchema,
+} from "../support/contracts/sprint.contract";
+import {
+  createAnnotationPayload,
+  createSprintPayload,
+} from "../support/factories/sprint.factory";
 
-test.describe('POST /api/sprints/{sprintId}/annotations', () => {
-test('adiciona uma anotação', async ({ sprints }) => {
-  const sprint = sprintSchema.parse((await sprints.create(createSprintPayload())).body);
-  const result = await sprints.addAnnotation(sprint.id, createAnnotationPayload());
+test.describe("POST /api/sprints/{sprintId}/annotations", () => {
+  test("ANN-001 adiciona uma anotação", async ({ sprints }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const result = await sprints.addAnnotation(
+      sprint.id,
+      createAnnotationPayload(),
+    );
 
-  expect(result.status).toBe(201);
-  expect(annotationSchema.parse(result.body).content).toContain('Anotação de teste');
+    const annotation = annotationSchema.parse(result.body);
+    expect(result.status).toBe(201);
+    expect(annotation.content).toContain("Anotação de teste");
+  });
+
+  test("ANN-002 rejeita annotation sem content", async ({ sprints }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const result = await sprints.addAnnotation(sprint.id, {});
+    apiErrorSchema.parse(result.body);
+    expect(result.status).toBe(400);
+  });
+
+  test("ANN-003 rejeita annotation com content vazio", async ({ sprints }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const result = await sprints.addAnnotation(sprint.id, { content: "" });
+    apiErrorSchema.parse(result.body);
+    expect(result.status).toBe(400);
+  });
+
+  test("ANN-004 rejeita annotation com content somente espaços", async ({
+    sprints,
+  }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const result = await sprints.addAnnotation(sprint.id, { content: " " });
+    apiErrorSchema.parse(result.body);
+    expect(result.status).toBe(400);
+  });
 });
 
-test('rejeita anotação sem conteúdo', async ({ sprints }) => {
-  const sprint = sprintSchema.parse((await sprints.create(createSprintPayload())).body);
-  const result = await sprints.addAnnotation(sprint.id, { content: ' ' });
+test.describe("PATCH /api/sprints/{sprintId}/annotations/{annotationId}", () => {
+  test("ANN-007 edita uma anotação", async ({ sprints }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const annotation = annotationSchema.parse(
+      (await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body,
+    );
+    const result = await sprints.updateAnnotation(sprint.id, annotation.id, {
+      content: "Anotação revisada",
+    });
 
-  expect(result.status).toBe(400);
-  apiErrorSchema.parse(result.body);
+    const updated = annotationSchema.parse(result.body);
+    expect(result.status).toBe(200);
+    expect(updated).toMatchObject({
+      id: annotation.id,
+      content: "Anotação revisada",
+    });
+  });
+
+  test("ANN-008 rejeita conteúdo vazio", async ({ sprints }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const annotation = annotationSchema.parse(
+      (await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body,
+    );
+    const result = await sprints.updateAnnotation(sprint.id, annotation.id, {
+      content: " ",
+    });
+
+    apiErrorSchema.parse(result.body);
+    expect(result.status).toBe(400);
+  });
 });
 
-});
+test.describe("DELETE /api/sprints/{sprintId}/annotations/{annotationId}", () => {
+  test("ANN-011 exclui uma anotação", async ({ sprints }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const annotation = annotationSchema.parse(
+      (await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body,
+    );
+    const result = await sprints.removeAnnotation(sprint.id, annotation.id);
 
-test.describe('PATCH /api/sprints/{sprintId}/annotations/{annotationId}', () => {
-test('edita uma anotação', async ({ sprints }) => {
-  const sprint = sprintSchema.parse((await sprints.create(createSprintPayload())).body);
-  const annotation = annotationSchema.parse((await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body);
-  const result = await sprints.updateAnnotation(sprint.id, annotation.id, { content: 'Anotação revisada' });
+    expect(result.status).toBe(204);
+  });
 
-  expect(result.status).toBe(200);
-  expect(annotationSchema.parse(result.body)).toMatchObject({ id: annotation.id, content: 'Anotação revisada' });
-});
+  test("ANN-012 retorna erro para anotação inexistente", async ({
+    sprints,
+  }) => {
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const result = await sprints.removeAnnotation(sprint.id, 999999);
 
-test('rejeita conteúdo vazio', async ({ sprints }) => {
-  const sprint = sprintSchema.parse((await sprints.create(createSprintPayload())).body);
-  const annotation = annotationSchema.parse((await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body);
-  const result = await sprints.updateAnnotation(sprint.id, annotation.id, { content: ' ' });
-
-  expect(result.status).toBe(400);
-  apiErrorSchema.parse(result.body);
-});
-
-});
-
-test.describe('DELETE /api/sprints/{sprintId}/annotations/{annotationId}', () => {
-test('exclui uma anotação', async ({ sprints }) => {
-  const sprint = sprintSchema.parse((await sprints.create(createSprintPayload())).body);
-  const annotation = annotationSchema.parse((await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body);
-  const result = await sprints.removeAnnotation(sprint.id, annotation.id);
-
-  expect(result.status).toBe(204);
-});
-
-test('retorna erro para anotação inexistente', async ({ sprints }) => {
-  const sprint = sprintSchema.parse((await sprints.create(createSprintPayload())).body);
-  const result = await sprints.removeAnnotation(sprint.id, 999999);
-
-  expect(result.status).toBe(404);
-  apiErrorSchema.parse(result.body);
-});
-
+    apiErrorSchema.parse(result.body);
+    expect(result.status).toBe(404);
+  });
 });

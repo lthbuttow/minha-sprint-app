@@ -6,13 +6,8 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI
     ? [['github'], ['html', { open: 'never' }]]
-    : 'list',
+    : [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:3001',
-  },
-  webServer: {
-    command: 'PORT=3001 JWT_SECRET=test-secret-with-at-least-thirty-two-characters AUTH_USERNAME=test-user AUTH_PASSWORD=test-password node src/server.js',
-    url: 'http://127.0.0.1:3001/health',
-    reuseExistingServer: !process.env.CI,
+    baseURL: 'http://localhost:3000',
   },
 });

@@ -1,23 +1,104 @@
-import { test, expect } from '@playwright/test';
-import { apiErrorSchema } from '../support/contracts/api.contract';
+import { test, expect } from "@playwright/test";
+import {
+  apiErrorSchema,
+  authTokenSchema,
+} from "../support/contracts/api.contract";
+import "../support/load-env";
 
-test.describe('Autenticação JWT', () => {
-  test('bloqueia uma rota protegida sem token', async ({ request }) => {
-    const response = await request.get('/api/sprints');
+const validCredentials = {
+  username: process.env.AUTH_USERNAME!,
+  password: process.env.AUTH_PASSWORD!,
+};
 
-    expect(response.status()).toBe(401);
+test.describe("Autenticação JWT", () => {
+  test("AUTH-009 bloqueia uma rota protegida sem token", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/sprints");
     apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
   });
 
-  test('emite token para credenciais válidas e rejeita credenciais inválidas', async ({ request }) => {
-    const invalid = await request.post('/api/auth/login', { data: { username: 'test-user', password: 'senha-incorreta' } });
-    expect(invalid.status()).toBe(401);
-
-    const valid = await request.post('/api/auth/login', { data: { username: 'test-user', password: 'test-password' } });
+  test("AUTH-001 emite token para credenciais válidas", async ({ request }) => {
+    const valid = await request.post("/api/auth/login", {
+      data: validCredentials,
+    });
+    const body = authTokenSchema.parse(await valid.json());
     expect(valid.status()).toBe(200);
-    const body = await valid.json();
-    expect(body).toMatchObject({ tokenType: 'Bearer' });
-    expect(body.expiresIn).toBeUndefined();
     expect(body.accessToken).toEqual(expect.any(String));
+  });
+
+  test("AUTH-002 rejeita username inválido", async ({ request }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { username: "inexistente", password: validCredentials.password },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-003 rejeita password inválida", async ({ request }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { username: validCredentials.username, password: "incorreta" },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-004 rejeita username e password inválidos", async ({
+    request,
+  }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { username: "inexistente", password: "incorreta" },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-005 rejeita username ausente", async ({ request }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { password: validCredentials.password },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-006 rejeita password ausente", async ({ request }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { username: validCredentials.username },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-007 rejeita username vazio", async ({ request }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { username: "", password: validCredentials.password },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-008 rejeita password vazia", async ({ request }) => {
+    const response = await request.post("/api/auth/login", {
+      data: { username: validCredentials.username, password: "" },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-010 rejeita token malformado", async ({ request }) => {
+    const response = await request.get("/api/sprints", {
+      headers: { Authorization: "Bearer invalido" },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
+  });
+
+  test("AUTH-011 rejeita Authorization sem Bearer", async ({ request }) => {
+    const response = await request.get("/api/sprints", {
+      headers: { Authorization: "invalido" },
+    });
+    apiErrorSchema.parse(await response.json());
+    expect(response.status()).toBe(401);
   });
 });
