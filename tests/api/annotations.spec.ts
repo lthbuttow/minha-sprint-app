@@ -14,14 +14,12 @@ test.describe("POST /api/sprints/{sprintId}/annotations", () => {
     const sprint = sprintSchema.parse(
       (await sprints.create(createSprintPayload())).body,
     );
-    const result = await sprints.addAnnotation(
-      sprint.id,
-      createAnnotationPayload(),
-    );
+    const payload = createAnnotationPayload();
+    const result = await sprints.addAnnotation(sprint.id, payload);
 
     const annotation = annotationSchema.parse(result.body);
     expect(result.status).toBe(201);
-    expect(annotation.content).toContain("Anotação de teste");
+    expect(annotation.content).toBe(payload.content);
   });
 
   test("ANN-002 rejeita annotation sem content", async ({ sprints }) => {
@@ -62,16 +60,12 @@ test.describe("PATCH /api/sprints/{sprintId}/annotations/{annotationId}", () => 
     const annotation = annotationSchema.parse(
       (await sprints.addAnnotation(sprint.id, createAnnotationPayload())).body,
     );
-    const result = await sprints.updateAnnotation(sprint.id, annotation.id, {
-      content: "Anotação revisada",
-    });
+    const payload = { content: "Anotação revisada" };
+    const result = await sprints.updateAnnotation(sprint.id, annotation.id, payload);
 
     const updated = annotationSchema.parse(result.body);
     expect(result.status).toBe(200);
-    expect(updated).toMatchObject({
-      id: annotation.id,
-      content: "Anotação revisada",
-    });
+    expect(updated).toMatchObject({ id: annotation.id, ...payload });
   });
 
   test("ANN-008 rejeita conteúdo vazio", async ({ sprints }) => {

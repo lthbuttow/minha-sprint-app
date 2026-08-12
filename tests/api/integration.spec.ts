@@ -13,18 +13,14 @@ import {
   createSprintPayload,
 } from "../support/factories/sprint.factory";
 
-const createSprint = async (
-  sprints: any,
-  overrides: Record<string, unknown> = {},
-) =>
-  sprintSchema.parse(
-    (await sprints.create(createSprintPayload(overrides))).body,
-  );
-
 test.describe("Integração entre recursos da sprint", () => {
   test("INTEGRATION-001 impede acesso cruzado a day", async ({ sprints }) => {
-    const sprintA = await createSprint(sprints);
-    const sprintB = await createSprint(sprints);
+    const sprintA = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const sprintB = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
     const day = sprintDaySchema.parse(
       (await sprints.addDay(sprintA.id, createDayPayload())).body,
     );
@@ -40,8 +36,12 @@ test.describe("Integração entre recursos da sprint", () => {
   test("INTEGRATION-002 impede acesso cruzado a annotation @smoke", async ({
     sprints,
   }) => {
-    const sprintA = await createSprint(sprints);
-    const sprintB = await createSprint(sprints);
+    const sprintA = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const sprintB = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
     const annotation = annotationSchema.parse(
       (await sprints.addAnnotation(sprintA.id, createAnnotationPayload())).body,
     );
@@ -61,8 +61,12 @@ test.describe("Integração entre recursos da sprint", () => {
   test("INTEGRATION-003 impede acesso cruzado a attention point @smoke", async ({
     sprints,
   }) => {
-    const sprintA = await createSprint(sprints);
-    const sprintB = await createSprint(sprints);
+    const sprintA = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const sprintB = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
     const point = attentionPointSchema.parse(
       (
         await sprints.addAttentionPoint(
@@ -88,30 +92,37 @@ test.describe("Integração entre recursos da sprint", () => {
   test("INTEGRATION-004 gerencia o ciclo funcional completo de uma sprint @smoke", async ({
     sprints,
   }) => {
-    const created = await createSprint(sprints);
-    const updatedSprintResult = await sprints.update(created.id, {
+    const created = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
+    const sprintPayload = {
       name: "Sprint integrada",
       generalNotes: "Notas integradas",
-    });
+    };
+    const updatedSprintResult = await sprints.update(created.id, sprintPayload);
     const updatedSprint = sprintSchema.parse(updatedSprintResult.body);
     expect(updatedSprintResult.status).toBe(200);
 
     const day = sprintDaySchema.parse(
       (await sprints.addDay(created.id, createDayPayload())).body,
     );
-    const updatedDayResult = await sprints.updateDay(created.id, day.id, {
-      summary: "Resumo integrado",
-    });
+    const dayPayload = { summary: "Resumo integrado" };
+    const updatedDayResult = await sprints.updateDay(
+      created.id,
+      day.id,
+      dayPayload,
+    );
     const updatedDay = sprintDaySchema.parse(updatedDayResult.body);
     expect(updatedDayResult.status).toBe(200);
 
     const annotation = annotationSchema.parse(
       (await sprints.addAnnotation(created.id, createAnnotationPayload())).body,
     );
+    const annotationPayload = { content: "Anotação integrada" };
     const updatedAnnotationResult = await sprints.updateAnnotation(
       created.id,
       annotation.id,
-      { content: "Anotação integrada" },
+      annotationPayload,
     );
     const updatedAnnotation = annotationSchema.parse(
       updatedAnnotationResult.body,
@@ -126,30 +137,27 @@ test.describe("Integração entre recursos da sprint", () => {
         )
       ).body,
     );
+    const pointPayload = { resolved: true, resolution: "Resolvido no fluxo" };
     const resolvedPointResult = await sprints.resolveAttentionPoint(
       created.id,
       point.id,
-      { resolved: true, resolution: "Resolvido no fluxo" },
+      pointPayload,
     );
     const resolvedPoint = attentionPointSchema.parse(resolvedPointResult.body);
     expect(resolvedPointResult.status).toBe(200);
 
-    expect(updatedSprint).toMatchObject({
-      name: "Sprint integrada",
-      generalNotes: "Notas integradas",
-    });
-    expect(updatedDay.summary).toBe("Resumo integrado");
-    expect(updatedAnnotation.content).toBe("Anotação integrada");
-    expect(resolvedPoint).toMatchObject({
-      resolved: true,
-      resolution: "Resolvido no fluxo",
-    });
+    expect(updatedSprint).toMatchObject(sprintPayload);
+    expect(updatedDay).toMatchObject(dayPayload);
+    expect(updatedAnnotation).toMatchObject(annotationPayload);
+    expect(resolvedPoint).toMatchObject(pointPayload);
   });
 
   test("INTEGRATION-005 mantém dados persistidos após múltiplas operações @smoke", async ({
     sprints,
   }) => {
-    const sprint = await createSprint(sprints);
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
     const day = sprintDaySchema.parse(
       (await sprints.addDay(sprint.id, createDayPayload())).body,
     );
@@ -190,7 +198,9 @@ test.describe("Integração entre recursos da sprint", () => {
   test("INTEGRATION-006 mantém consistência após exclusões", async ({
     sprints,
   }) => {
-    const sprint = await createSprint(sprints);
+    const sprint = sprintSchema.parse(
+      (await sprints.create(createSprintPayload())).body,
+    );
     const day = sprintDaySchema.parse(
       (await sprints.addDay(sprint.id, createDayPayload())).body,
     );

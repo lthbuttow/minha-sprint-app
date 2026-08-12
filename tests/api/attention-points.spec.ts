@@ -14,14 +14,12 @@ test.describe("POST /api/sprints/{sprintId}/attention-points", () => {
     const sprint = sprintSchema.parse(
       (await sprints.create(createSprintPayload())).body,
     );
-    const result = await sprints.addAttentionPoint(
-      sprint.id,
-      createAttentionPointPayload(),
-    );
+    const payload = createAttentionPointPayload();
+    const result = await sprints.addAttentionPoint(sprint.id, payload);
 
     const point = attentionPointSchema.parse(result.body);
     expect(result.status).toBe(201);
-    expect(point.title).toContain("Ponto de atenção");
+    expect(point).toMatchObject(payload);
   });
 
   test("ATT-002 rejeita ponto sem title", async ({ sprints }) => {
@@ -67,18 +65,15 @@ test.describe("PATCH /api/sprints/{sprintId}/attention-points/{pointId}", () => 
         )
       ).body,
     );
-    const result = await sprints.resolveAttentionPoint(sprint.id, point.id, {
+    const payload = {
       resolved: true,
       resolution: "Risco eliminado",
-    });
+    };
+    const result = await sprints.resolveAttentionPoint(sprint.id, point.id, payload);
 
     const updated = attentionPointSchema.parse(result.body);
     expect(result.status).toBe(200);
-    expect(updated).toMatchObject({
-      id: point.id,
-      resolved: true,
-      resolution: "Risco eliminado",
-    });
+    expect(updated).toMatchObject({ id: point.id, ...payload });
   });
 
   test("ATT-008 exige resolução ao resolver um ponto @smoke", async ({ sprints }) => {

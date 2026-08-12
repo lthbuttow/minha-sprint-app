@@ -11,10 +11,14 @@ test("SPRINT-001 lista sprints @smoke", async ({ sprints }) => {
 });
 
 test("SPRINT-002 cria uma sprint válida @smoke", async ({ sprints }) => {
-  const result = await sprints.create(createSprintPayload());
+  const payload = createSprintPayload();
+  const result = await sprints.create(payload);
   const sprint = sprintSchema.parse(result.body);
   expect(result.status).toBe(201);
-  expect(sprint.id).toEqual(expect.any(Number));
+  expect(sprint).toMatchObject({
+    name: payload.name,
+    generalNotes: payload.generalNotes,
+  });
 });
 
 test("SPRINT-003 usa data padrão sem startDate", async ({ sprints }) => {
@@ -27,13 +31,14 @@ test("SPRINT-003 usa data padrão sem startDate", async ({ sprints }) => {
 });
 
 test("SPRINT-004 cria onze dias consecutivos @smoke", async ({ sprints }) => {
-  const result = await sprints.create(createSprintPayload());
+  const payload = createSprintPayload();
+  const result = await sprints.create(payload);
   const sprint = sprintSchema.parse(result.body);
   expect(result.status).toBe(201);
   expect(sprint.days).toHaveLength(11);
   expect(new Set(sprint.days.map(({ date }) => date)).size).toBe(11);
   expect(sprint.days.map(({ date }) => date)).toEqual([
-    "2026-08-03",
+    payload.startDate,
     "2026-08-04",
     "2026-08-05",
     "2026-08-06",
@@ -92,12 +97,11 @@ test("SPRINT-011 rejeita generalNotes com tipo inválido", async ({
 });
 
 test("SPRINT-010 persiste generalNotes válida", async ({ sprints }) => {
-  const result = await sprints.create(
-    createSprintPayload({ generalNotes: "Nota válida" }),
-  );
+  const payload = createSprintPayload({ generalNotes: "Nota válida" });
+  const result = await sprints.create(payload);
   const sprint = sprintSchema.parse(result.body);
   expect(result.status).toBe(201);
-  expect(sprint.generalNotes).toBe("Nota válida");
+  expect(sprint.generalNotes).toBe(payload.generalNotes);
 });
 
 test("SPRINT-012 consulta uma sprint existente @smoke", async ({ sprints }) => {
@@ -138,36 +142,36 @@ test("SPRINT-017 atualiza nome", async ({ sprints }) => {
   const sprint = sprintSchema.parse(
     (await sprints.create(createSprintPayload())).body,
   );
-  const name = await sprints.update(sprint.id, { name: "Atualizada" });
+  const payload = { name: "Atualizada" };
+  const name = await sprints.update(sprint.id, payload);
   const named = sprintSchema.parse(name.body);
   expect(name.status).toBe(200);
-  expect(named.name).toBe("Atualizada");
+  expect(named.name).toBe(payload.name);
 });
 
 test("SPRINT-018 atualiza generalNotes", async ({ sprints }) => {
   const sprint = sprintSchema.parse(
     (await sprints.create(createSprintPayload())).body,
   );
-  const notes = await sprints.update(sprint.id, { generalNotes: "Nova nota" });
+  const payload = { generalNotes: "Nova nota" };
+  const notes = await sprints.update(sprint.id, payload);
   const updated = sprintSchema.parse(notes.body);
   expect(notes.status).toBe(200);
-  expect(updated.generalNotes).toBe("Nova nota");
+  expect(updated.generalNotes).toBe(payload.generalNotes);
 });
 
 test("SPRINT-019 atualiza nome e generalNotes", async ({ sprints }) => {
   const sprint = sprintSchema.parse(
     (await sprints.create(createSprintPayload())).body,
   );
-  const result = await sprints.update(sprint.id, {
+  const payload = {
     name: "Atualizada",
     generalNotes: "Novo foco",
-  });
+  };
+  const result = await sprints.update(sprint.id, payload);
   const updated = sprintSchema.parse(result.body);
   expect(result.status).toBe(200);
-  expect(updated).toMatchObject({
-    name: "Atualizada",
-    generalNotes: "Novo foco",
-  });
+  expect(updated).toMatchObject(payload);
 });
 
 test("SPRINT-020 rejeita atualização sem campos", async ({ sprints }) => {
@@ -201,8 +205,9 @@ test("SPRINT-023 preserva campos não enviados @smoke", async ({ sprints }) => {
     (await sprints.create(createSprintPayload({ generalNotes: "Original" })))
       .body,
   );
-  const result = await sprints.update(sprint.id, { name: "Alterado" });
+  const payload = { name: "Alterado" };
+  const result = await sprints.update(sprint.id, payload);
   const updated = sprintSchema.parse(result.body);
   expect(result.status).toBe(200);
-  expect(updated).toMatchObject({ name: "Alterado", generalNotes: "Original" });
+  expect(updated).toMatchObject({ ...payload, generalNotes: "Original" });
 });
