@@ -12,6 +12,10 @@ jobs:
   api-tests:
     name: Executar testes de API
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
+      AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
 
     steps:
       - name: Baixar código
@@ -26,8 +30,38 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Iniciar API
+        run: |
+          npm start > api.log 2>&1 &
+          echo $! > api.pid
+
+      - name: Aguardar API disponível
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://localhost:3000/health > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat api.log
+          exit 1
+
+      - name: Gerar token de teste
+        run: |
+          credentials=$(node -e 'process.stdout.write(JSON.stringify({ username: process.env.AUTH_USERNAME, password: process.env.AUTH_PASSWORD }))')
+          response=$(curl --fail --silent --show-error \
+            --request POST http://localhost:3000/api/auth/login \
+            --header 'Content-Type: application/json' \
+            --data "$credentials")
+          token=$(node -e 'const response = JSON.parse(process.argv[1]); process.stdout.write(response.accessToken)' "$response")
+          echo "TEST_AUTH_TOKEN=$token" >> "$GITHUB_ENV"
+
       - name: Executar testes de smoke da API
         run: npm run test:api:smoke
+
+      - name: Encerrar API
+        if: ${{ always() }}
+        run: test ! -f api.pid || kill "$(cat api.pid)"
 
       - name: Publicar relatório Playwright
         if: ${{ always() }}
