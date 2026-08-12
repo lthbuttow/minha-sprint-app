@@ -10,7 +10,10 @@
     "test:api": "playwright test",
     "test:api:smoke": "playwright test --grep @smoke",
     "test:api:ui": "playwright test --ui",
-    "test:api:report": "playwright show-report"
+    "test:api:report": "playwright show-report",
+    "test:ui": "playwright test --config=playwright.ui.config.ts",
+    "test:ui:smoke": "playwright test --config=playwright.ui.config.ts --grep @smoke",
+    "test:ui:mode": "playwright test --config=playwright.ui.config.ts --ui"
   },
   "engines": {
     "node": ">=20"

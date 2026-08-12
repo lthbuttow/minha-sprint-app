@@ -85,6 +85,16 @@ Por exemplo, um cenário cria uma massa com `createSprintPayload`, chama `sprint
 npm run test:api
 ```
 
+## Testes de UI
+
+Os cenários de interface usam Playwright e seguem o mesmo padrão de identificação dos testes de API: `UI-<número> descrição`. Eles cobrem os fluxos críticos de autenticação, criação de sprint e registro do resumo diário.
+
+Com a aplicação em execução e as credenciais `AUTH_USERNAME` e `AUTH_PASSWORD` definidas no `.env`, execute:
+
+```bash
+npm run test:ui
+```
+
 ## Execução no GitHub Actions
 
 O workflow [Testes de API](.github/workflows/api-tests.yml) é executado em pushes e pull requests para `main`, além de poder ser iniciado manualmente. Ao final de cada execução, o relatório HTML do Playwright fica disponível como o artefato `relatorio-testes-api`, inclusive quando algum teste falhar.
