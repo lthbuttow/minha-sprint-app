@@ -11,8 +11,8 @@ import { ApiClient } from "./api-client";
 export class SprintService {
   private readonly client: ApiClient;
 
-  constructor(request: APIRequestContext) {
-    this.client = new ApiClient(request);
+  constructor(request: APIRequestContext, token: string) {
+    this.client = new ApiClient(request, token);
   }
 
   create(data: object) {

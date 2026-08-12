@@ -11,7 +11,7 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:3001',
   },
   webServer: {
-    command: 'PORT=3001 node src/server.js',
+    command: 'PORT=3001 JWT_SECRET=test-secret-with-at-least-thirty-two-characters AUTH_USERNAME=test-user AUTH_PASSWORD=test-password node src/server.js',
     url: 'http://127.0.0.1:3001/health',
     reuseExistingServer: !process.env.CI,
   },

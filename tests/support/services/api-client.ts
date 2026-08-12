@@ -2,26 +2,30 @@ import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { ApiResult } from '../contracts/types';
 
 export class ApiClient {
-  constructor(private readonly request: APIRequestContext) {}
+  constructor(private readonly request: APIRequestContext, private readonly token: string) {}
+
+  private get options() {
+    return { headers: { Authorization: `Bearer ${this.token}` } };
+  }
 
   get<T>(url: string) {
-    return this.json<T>(this.request.get(url));
+    return this.json<T>(this.request.get(url, this.options));
   }
 
   post<T>(url: string, data: object) {
-    return this.json<T>(this.request.post(url, { data }));
+    return this.json<T>(this.request.post(url, { data, ...this.options }));
   }
 
   patch<T>(url: string, data: object) {
-    return this.json<T>(this.request.patch(url, { data }));
+    return this.json<T>(this.request.patch(url, { data, ...this.options }));
   }
 
   delete<T>(url: string) {
-    return this.jsonOrEmpty<T>(this.request.delete(url));
+    return this.jsonOrEmpty<T>(this.request.delete(url, this.options));
   }
 
   getBinary(url: string) {
-    return this.binary(this.request.get(url));
+    return this.binary(this.request.get(url, this.options));
   }
 
   private async json<T>(response: Promise<APIResponse>): Promise<ApiResult<T>> {

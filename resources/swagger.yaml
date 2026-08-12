@@ -5,9 +5,24 @@ info:
   description: API REST local para registrar o acompanhamento diário de sprints pessoais.
 servers:
   - url: http://localhost:3000
+security:
+  - bearerAuth: []
 paths:
+  /api/auth/login:
+    post:
+      security: []
+      summary: Autentica o usuário e retorna um token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Login' }
+      responses:
+        '200': { description: Token JWT emitido, content: { application/json: { schema: { $ref: '#/components/schemas/AuthToken' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
   /health:
     get:
+      security: []
       summary: Verifica a disponibilidade da API
       responses:
         '200':
@@ -146,16 +161,30 @@ paths:
         '400': { $ref: '#/components/responses/BadRequest' }
         '404': { $ref: '#/components/responses/NotFound' }
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     SprintId: { name: sprintId, in: path, required: true, schema: { type: integer, minimum: 1 } }
     DayId: { name: dayId, in: path, required: true, schema: { type: integer, minimum: 1 } }
     PointId: { name: pointId, in: path, required: true, schema: { type: integer, minimum: 1 } }
     AnnotationId: { name: annotationId, in: path, required: true, schema: { type: integer, minimum: 1 } }
   responses:
+    Unauthorized: { description: Token ausente ou inválido, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     BadRequest: { description: Dados inválidos, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     NotFound: { description: Recurso não encontrado, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
     Conflict: { description: Conflito de dados, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
   schemas:
+    Login:
+      type: object
+      required: [username, password]
+      properties: { username: { type: string }, password: { type: string, format: password } }
+    AuthToken:
+      type: object
+      required: [accessToken, tokenType]
+      properties: { accessToken: { type: string }, tokenType: { type: string, example: Bearer } }
     Health: { type: object, required: [status], properties: { status: { type: string, example: ok } } }
     Error: { type: object, required: [error], properties: { error: { type: string } } }
     SprintDay:

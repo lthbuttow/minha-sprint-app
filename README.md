@@ -1,6 +1,6 @@
 # My Sprint Tracker API
 
-API REST pessoal para registrar o resumo diário de uma sprint, anotações gerais e pontos de atenção. Não possui autenticação e usa um banco SQLite inteiramente em memória: os dados são descartados ao encerrar o processo.
+API REST pessoal para registrar o resumo diário de uma sprint, anotações gerais e pontos de atenção. A API é protegida por JWT e usa um banco SQLite inteiramente em memória: os dados são descartados ao encerrar o processo.
 
 ## Requisitos e execução
 
@@ -8,8 +8,13 @@ Requer Node.js 20 ou superior.
 
 ```bash
 npm install
+cp .env.example .env # defina valores seguros no seu ambiente
 npm start
 ```
+
+Defina `JWT_SECRET` com ao menos 32 caracteres, além de `AUTH_USERNAME` e `AUTH_PASSWORD`. A rota pública `POST /api/auth/login` recebe essas credenciais e retorna um JWT sem expiração. As rotas de negócio em `/api/sprints` exigem `Authorization: Bearer <token>`; `/health` e `/api-docs` permanecem públicos para monitoramento e documentação.
+
+Os testes de API exigem `TEST_AUTH_TOKEN=<seu-jwt>` no `.env`; gere-o por `POST /api/auth/login` e cole o valor de `accessToken`. A suíte reutiliza exclusivamente esse token e não executa login automático.
 
 A aplicação web estará em `http://localhost:3000`; a interface Swagger está em `http://localhost:3000/api-docs`. A especificação fonte está em [resources/swagger.yaml](resources/swagger.yaml).
 
@@ -27,6 +32,7 @@ Ao criar uma sprint, são criados 11 dias consecutivos a partir de `startDate` (
 
 | Método | Rota | Finalidade |
 | --- | --- | --- |
+| POST | `/api/auth/login` | Autentica e emite JWT |
 | GET | `/health` | Estado da API |
 | GET, POST | `/api/sprints` | Lista ou cria sprints |
 | GET, PATCH | `/api/sprints/:sprintId` | Consulta ou atualiza nome/anotações |
@@ -41,11 +47,17 @@ Consulte o Swagger para os schemas JSON completos e todos os códigos de respost
 ## Exemplos
 
 ```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"troque-esta-senha"}'
+
 curl -X POST http://localhost:3000/api/sprints \
+  -H 'Authorization: Bearer <token>' \
   -H 'Content-Type: application/json' \
   -d '{"name":"Sprint 12","startDate":"2026-08-03","generalNotes":"Foco em entregas."}'
 
 curl -X PATCH http://localhost:3000/api/sprints/1/days/1 \
+  -H 'Authorization: Bearer <token>' \
   -H 'Content-Type: application/json' \
   -d '{"summary":"Implementei a tela de relatório."}'
 ```

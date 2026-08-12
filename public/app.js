@@ -1,14 +1,15 @@
-const state = { sprints: [], selectedId: null, resolvingPointId: null, showAllSprints: false };
+const state = { sprints: [], selectedId: null, resolvingPointId: null, showAllSprints: false, token: sessionStorage.getItem('accessToken') };
 const $ = (selector) => document.querySelector(selector);
 
 const api = async (path, options = {}) => {
   const response = await fetch(`/api${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}) },
     ...options,
     body: options.body ? JSON.stringify(options.body) : undefined
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401) logout();
     throw new Error(body.error || 'Não foi possível concluir esta ação.');
   }
   return response.status === 204 ? null : response.json();
@@ -20,6 +21,12 @@ function toast(message) {
   element.classList.add('show');
   window.clearTimeout(toast.timer);
   toast.timer = window.setTimeout(() => element.classList.remove('show'), 2600);
+}
+
+function logout() {
+  state.token = null;
+  sessionStorage.removeItem('accessToken');
+  $('#login-modal').showModal();
 }
 
 function selectedSprint() {
@@ -119,7 +126,20 @@ $('#show-more-sprints').addEventListener('click', () => {
 });
 
 $('#sprint-header').addEventListener('click', (event) => {
-  if (event.target.closest('[data-export-report]')) window.location.assign(`/api/sprints/${state.selectedId}/report.pdf`);
+  if (event.target.closest('[data-export-report]')) {
+    fetch(`/api/sprints/${state.selectedId}/report.pdf`, { headers: { Authorization: `Bearer ${state.token}` } }).then(async (response) => {
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        if (response.status === 401) logout();
+        throw new Error(body.error || 'Não foi possível exportar o relatório.');
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = Object.assign(document.createElement('a'), { href: url, download: `relatorio-sprint-${state.selectedId}.pdf` });
+      link.click();
+      URL.revokeObjectURL(url);
+    }).catch((error) => toast(error.message));
+  }
 });
 
 $('#days-list').addEventListener('change', async (event) => {
@@ -205,4 +225,17 @@ $('#resolution-form').addEventListener('submit', async (event) => {
 });
 
 $('#sprint-start-date').value = new Date().toISOString().slice(0, 10);
-refresh().catch((error) => toast(`Erro ao carregar: ${error.message}`));
+$('#login-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const response = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: $('#login-username').value, password: $('#login-password').value }) });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) return toast(body.error || 'Não foi possível entrar.');
+  state.token = body.accessToken;
+  sessionStorage.setItem('accessToken', state.token);
+  $('#login-form').reset();
+  $('#login-modal').close();
+  refresh().catch((error) => toast(`Erro ao carregar: ${error.message}`));
+});
+
+if (state.token) refresh().catch((error) => toast(`Erro ao carregar: ${error.message}`));
+else $('#login-modal').showModal();
