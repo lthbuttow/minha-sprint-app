@@ -95,6 +95,14 @@ Com a aplicação em execução e as credenciais `AUTH_USERNAME` e `AUTH_PASSWOR
 npm run test:ui
 ```
 
+## Teste de performance (k6)
+
+O smoke test consulta continuamente a lista autenticada de sprints por 30 segundos, com 20 usuários virtuais simultâneos, usando o `TEST_AUTH_TOKEN` já configurado no `.env`. Para testar uma API online, substitua `BASE_URL` no `.env` pela URL publicada. Com o k6 instalado, execute:
+
+```bash
+npm run test:performance
+```
+
 ## Execução no GitHub Actions
 
 O workflow [Testes de API](.github/workflows/api-tests.yml) é executado em pushes e pull requests para `main`, além de poder ser iniciado manualmente. Ao final de cada execução, o relatório HTML do Playwright fica disponível como o artefato `relatorio-testes-api`, inclusive quando algum teste falhar.
